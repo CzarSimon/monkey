@@ -1,37 +1,5 @@
 package token
 
-const (
-	ILLEGAL = "ILLEGAL"
-	EOF     = "EOF"
-
-	// Indentifiers + literals
-	IDENT = "IDENT" // basically variable name
-	INT   = "INT"   // Integer type
-
-	// Operators
-	ASSIGN = "="
-	PLUS   = "+"
-
-	// Delimiters
-	COMMA     = ","
-	SEMICOLON = ";"
-
-	LPAREN = "("
-	RPAREN = ")"
-	LBRACE = "{"
-	RBRACE = "}"
-
-	// Keywords
-	FUNCTION = "FUNCTION"
-	LET      = "LET"
-)
-
-// keywords Map of keywords to token type
-var keywords = map[string]TokenType{
-	"fn":  FUNCTION,
-	"let": LET,
-}
-
 // TokenType Represents a possible type of tokens
 type TokenType string
 
@@ -56,4 +24,10 @@ func New(tokenType TokenType, literal string) Token {
 		Type:    tokenType,
 		Literal: literal,
 	}
+}
+
+// keywords Map of keywords to token type
+var keywords = map[string]TokenType{
+	"fn":  FUNCTION,
+	"let": LET,
 }

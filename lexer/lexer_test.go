@@ -19,6 +19,9 @@ func TestNextToken(t *testing.T) {
     x + y;
   };
   let result = add(five, ten);
+  @
+  !-/*5;
+  5 < 10 > 5;
   `
 	tests := []expectedTokenType{
 		{token.LET, "let"},
@@ -57,17 +60,18 @@ func TestNextToken(t *testing.T) {
 		{token.IDENT, "ten"},
 		{token.RPAREN, ")"},
 		{token.SEMICOLON, ";"},
+		{token.ILLEGAL, "@"},
 		{token.EOF, ""},
 	}
 	lexer := New(input)
 	for i, tt := range tests {
 		tok := lexer.NextToken()
 		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
+			t.Fatalf("tests[%d] - TokenType wrong. expected=%q, got=%q",
 				i, tt.expectedType, tok.Type)
 		}
 		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
+			t.Fatalf("tests[%d] - Literal wrong. expected=%q, got=%q",
 				i, tt.expectedLiteral, tok.Literal)
 		}
 	}
