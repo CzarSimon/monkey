@@ -13,6 +13,11 @@ type Lexer struct {
 	currentChar  byte // current char under examination
 }
 
+// CurrentChar Gets the current character as a string
+func (lexer Lexer) CurrentChar() string {
+	return string(lexer.currentChar)
+}
+
 // New Creates a new lexer based on an input string
 func New(input string) *Lexer {
 	lexer := &Lexer{
@@ -26,32 +31,36 @@ func New(input string) *Lexer {
 // NextToken Gets the next token from the input
 func (lexer *Lexer) NextToken() token.Token {
 	var nextToken token.Token
+	lexer.skipWhitespace()
 	switch lexer.currentChar {
 	case '=':
-		nextToken = newToken(token.ASSIGN, lexer.currentChar)
+		nextToken = token.New(token.ASSIGN, lexer.CurrentChar())
 	case ';':
-		nextToken = newToken(token.SEMICOLON, lexer.currentChar)
+		nextToken = token.New(token.SEMICOLON, lexer.CurrentChar())
 	case '(':
-		nextToken = newToken(token.LPAREN, lexer.currentChar)
+		nextToken = token.New(token.LPAREN, lexer.CurrentChar())
 	case ')':
-		nextToken = newToken(token.RPAREN, lexer.currentChar)
+		nextToken = token.New(token.RPAREN, lexer.CurrentChar())
 	case ',':
-		nextToken = newToken(token.COMMA, lexer.currentChar)
+		nextToken = token.New(token.COMMA, lexer.CurrentChar())
 	case '+':
-		nextToken = newToken(token.PLUS, lexer.currentChar)
+		nextToken = token.New(token.PLUS, lexer.CurrentChar())
 	case '{':
-		nextToken = newToken(token.LBRACE, lexer.currentChar)
+		nextToken = token.New(token.LBRACE, lexer.CurrentChar())
 	case '}':
-		nextToken = newToken(token.RBRACE, lexer.currentChar)
+		nextToken = token.New(token.RBRACE, lexer.CurrentChar())
 	case 0:
 		nextToken.Literal = ""
 		nextToken.Type = token.EOF
 	default:
 		if isLetter(lexer.currentChar) {
 			nextToken.Literal = lexer.readIdentifier()
+			nextToken.Type = token.LookupIdent(nextToken.Literal)
 			return nextToken
+		} else if isDigit(lexer.currentChar) {
+			return token.New(token.INT, lexer.readNumber())
 		} else {
-			nextToken = newToken(token.ILLEGAL, lexer.currentChar)
+			nextToken = token.New(token.ILLEGAL, lexer.CurrentChar())
 		}
 	}
 	lexer.readChar()
@@ -69,14 +78,6 @@ func (lexer *Lexer) readChar() {
 	lexer.readPosition++
 }
 
-// newToken Creates new token based on a supplied type and a charachter
-func newToken(tokenType token.TokenType, char byte) token.Token {
-	return token.Token{
-		Type:    tokenType,
-		Literal: string(char),
-	}
-}
-
 // readIdentifier Reads identifier name from input
 func (lexer *Lexer) readIdentifier() string {
 	startPosition := lexer.position
@@ -84,4 +85,25 @@ func (lexer *Lexer) readIdentifier() string {
 		lexer.readChar()
 	}
 	return lexer.input[startPosition:lexer.position]
+}
+
+// readNumber Reads a number from input
+func (lexer *Lexer) readNumber() string {
+	startPosition := lexer.position
+	for isDigit(lexer.currentChar) {
+		lexer.readChar()
+	}
+	return lexer.input[startPosition:lexer.position]
+}
+
+// skipWhitespace Skips over whitespace characters in input
+func (lexer *Lexer) skipWhitespace() {
+	for isWhitespace(lexer.currentChar) {
+		lexer.readChar()
+	}
+}
+
+// isWhitespace Checks if a character is considered a whitespace character
+func isWhitespace(char byte) bool {
+	return char == ' ' || char == '\n' || char == '\t' || char == '\r'
 }

@@ -50,6 +50,7 @@ func TestNextToken(t *testing.T) {
 		{token.LET, "let"},
 		{token.IDENT, "result"},
 		{token.ASSIGN, "="},
+		{token.IDENT, "add"},
 		{token.LPAREN, "("},
 		{token.IDENT, "five"},
 		{token.COMMA, ","},
@@ -83,5 +84,16 @@ func TestNextTokenOnEmptyInput(t *testing.T) {
 	if tok.Literal != expectedToken.Literal {
 		t.Fatalf("tests- literal wrong. expected=%q, got=%q",
 			expectedToken.Literal, tok.Literal)
+	}
+}
+
+func TestCurrentChar(t *testing.T) {
+	lexer := New("+-")
+	if lexer.CurrentChar() != "+" {
+		t.Fatalf("Wrong CurrentChar (as string): Expected=+ got=%s", lexer.CurrentChar())
+	}
+	lexer.readChar()
+	if lexer.CurrentChar() != "-" {
+		t.Fatalf("Wrong CurrentChar (as string): Expected=- got=%s", lexer.CurrentChar())
 	}
 }
