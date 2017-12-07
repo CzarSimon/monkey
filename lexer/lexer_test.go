@@ -22,6 +22,11 @@ func TestNextToken(t *testing.T) {
   @
   !-/*5;
   5 < 10 > 5;
+	if (5 < 10) {
+		return true;
+	} else {
+		return false;
+	}
   `
 	tests := []expectedTokenType{
 		{token.LET, "let"},
@@ -61,6 +66,18 @@ func TestNextToken(t *testing.T) {
 		{token.RPAREN, ")"},
 		{token.SEMICOLON, ";"},
 		{token.ILLEGAL, "@"},
+		{token.NOT, "!"},
+		{token.MINUS, "-"},
+		{token.DIVIDE, "/"},
+		{token.MULTIPLY, "*"},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
+		{token.INT, "5"},
+		{token.LT, "<"},
+		{token.INT, "10"},
+		{token.GT, ">"},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 	lexer := New(input)

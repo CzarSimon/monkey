@@ -28,6 +28,11 @@ func New(tokenType TokenType, literal string) Token {
 
 // keywords Map of keywords to token type
 var keywords = map[string]TokenType{
-	"fn":  FUNCTION,
-	"let": LET,
+	"fn":     FUNCTION,
+	"let":    LET,
+	"if":     IF,
+	"else":   ELSE,
+	"return": RETRUN,
+	"true":   TRUE,
+	"false":  FALSE,
 }

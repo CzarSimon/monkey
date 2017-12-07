@@ -4,10 +4,10 @@ import "testing"
 
 func TestLookupIdent(t *testing.T) {
 	testStrings := []string{
-		"fn", "add", "let", "present?",
+		"fn", "add", "let", "present?", "if", "else", "return", "true", "false",
 	}
 	expectedTokenTypes := []TokenType{
-		FUNCTION, IDENT, LET, IDENT,
+		FUNCTION, IDENT, LET, IDENT, IF, ELSE, RETRUN, TRUE, FALSE,
 	}
 	for i, testString := range testStrings {
 		tokenType := LookupIdent(testString)

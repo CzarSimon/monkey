@@ -33,4 +33,9 @@ const (
 	// Keywords
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
+	IF       = "IF"
+	ELSE     = "ELSE"
+	RETRUN   = "RETURN"
+	TRUE     = "TRUE"
+	FALSE    = "FALSE"
 )

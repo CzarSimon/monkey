@@ -49,6 +49,18 @@ func (lexer *Lexer) NextToken() token.Token {
 		nextToken = token.New(token.LBRACE, lexer.CurrentChar())
 	case '}':
 		nextToken = token.New(token.RBRACE, lexer.CurrentChar())
+	case '!':
+		nextToken = token.New(token.NOT, lexer.CurrentChar())
+	case '-':
+		nextToken = token.New(token.MINUS, lexer.CurrentChar())
+	case '*':
+		nextToken = token.New(token.MULTIPLY, lexer.CurrentChar())
+	case '/':
+		nextToken = token.New(token.DIVIDE, lexer.CurrentChar())
+	case '<':
+		nextToken = token.New(token.LT, lexer.CurrentChar())
+	case '>':
+		nextToken = token.New(token.GT, lexer.CurrentChar())
 	case 0:
 		nextToken.Literal = ""
 		nextToken.Type = token.EOF
