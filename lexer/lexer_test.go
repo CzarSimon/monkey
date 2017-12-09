@@ -53,7 +53,9 @@ func TestNextToken(t *testing.T) {
 		{token.TRUE, "true"}, {token.SEMICOLON, ";"}, {token.RBRACE, "}"},
 		{token.ELSE, "else"}, {token.LBRACE, "{"}, {token.RETRUN, "return"},
 		{token.FALSE, "false"}, {token.SEMICOLON, ";"}, {token.RBRACE, "}"},
-		{token.EOF, ""},
+		{token.INT, "10"}, {token.EQ, "=="}, {token.INT, "10"},
+		{token.SEMICOLON, ";"}, {token.INT, "10"}, {token.NOT_EQ, "!="},
+		{token.INT, "9"}, {token.SEMICOLON, ";"}, {token.EOF, ""},
 	}
 	lexer := New(input)
 	for i, tt := range tests {
