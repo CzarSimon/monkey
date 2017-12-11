@@ -52,10 +52,38 @@ func (parser *Parser) parseStatement() ast.Statement {
 	}
 }
 
+// parseLetStatement Parses a LetStatement
 func (parser *Parser) parseLetStatement() *ast.LetStatement {
-	stmt := NewLetStatement(parser.currentToken)
-	if !(parser.peekToken.Type == token.IDENT) {
+	stmt := ast.NewLetStatement(parser.currentToken)
+	if !parser.expectPeek(token.IDENT) {
 		return nil
 	}
+	stmt.Name = ast.NewIdentifier(parser.currentToken, parser.currentToken.Literal)
+	if !parser.expectPeek(token.ASSIGN) {
+		return nil
+	}
+	// TODO: Write expression parsing
+	for !parser.currentTokenIs(token.SEMICOLON) {
+		parser.nextToken()
+	}
 	return stmt
+}
+
+// expectPeek Checks the type of peekToken and andvances the token pointers if the type was expected
+func (parser *Parser) expectPeek(tokenType token.TokenType) bool {
+	if parser.peekTokenIs(tokenType) {
+		parser.nextToken()
+		return true
+	}
+	return false
+}
+
+// currentTokenIs Checks if currentToken is of a supplied type
+func (parser *Parser) currentTokenIs(tokenType token.TokenType) bool {
+	return parser.currentToken.Type == tokenType
+}
+
+// peekTokenIs Checks if peekToken is of a supplied type
+func (parser *Parser) peekTokenIs(tokenType token.TokenType) bool {
+	return parser.peekToken.Type == tokenType
 }

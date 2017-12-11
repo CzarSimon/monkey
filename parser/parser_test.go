@@ -15,7 +15,7 @@ func TestLetStatements(t *testing.T) {
 	input := `
   let x = 5;
   let y = 10;
-  let foobor = 838383;
+  let foobar = 838383;
   `
 	noStatements := 3
 	lex := lexer.New(input)
