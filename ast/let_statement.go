@@ -17,3 +17,10 @@ func (letStmt LetStatement) statementNode() {}
 func (letStmt LetStatement) TokenLiteral() string {
 	return letStmt.Token.Literal
 }
+
+// NewLetStatement Creates a new partially populated LetStatement and returns its reference
+func NewLetStatement(tok token.Token) *LetStatement {
+	return &LetStatement{
+		Token: tok,
+	}
+}

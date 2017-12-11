@@ -31,5 +31,31 @@ func (parser *Parser) nextToken() {
 
 // ParseProgram Parses a programed described in the supplied lexer
 func (parser *Parser) ParseProgram() *ast.Program {
-	return nil
+	program := ast.NewProgram()
+	for parser.currentToken.Type != token.EOF {
+		stmt := parser.parseStatement()
+		if stmt != nil {
+			program.Statements = append(program.Statements, stmt)
+		}
+		parser.nextToken()
+	}
+	return program
+}
+
+// parseStatement Parsers a statement from input
+func (parser *Parser) parseStatement() ast.Statement {
+	switch parser.currentToken.Type {
+	case token.LET:
+		return parser.parseLetStatement()
+	default:
+		return nil
+	}
+}
+
+func (parser *Parser) parseLetStatement() *ast.LetStatement {
+	stmt := NewLetStatement(parser.currentToken)
+	if !(parser.peekToken.Type == token.IDENT) {
+		return nil
+	}
+	return stmt
 }

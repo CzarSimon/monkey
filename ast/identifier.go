@@ -16,3 +16,11 @@ func (id Identifier) expressionNode() {}
 func (id Identifier) TokenLiteral() string {
 	return id.Token.Literal
 }
+
+// NewIdentifier Creates a new identifier and returns its reference
+func NewIdentifier(tok token.Token, value string) *Identifier {
+	return &Identifier{
+		Token: tok,
+		Value: value,
+	}
+}
