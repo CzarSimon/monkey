@@ -29,3 +29,15 @@ func TestNew(t *testing.T) {
 		t.Fatalf("Test- Wrong Literal, expected=%q got=%q", expectedLiteral, token.Literal)
 	}
 }
+
+func TestIsEmpty(t *testing.T) {
+	fullToken := New(RETRUN, "return")
+	if fullToken.IsEmpty() {
+		t.Fatalf("Wrong: Full token %+v was deemed empty", fullToken)
+	}
+	emptyToken := Token{}
+	if !emptyToken.IsEmpty() {
+		t.Fatalf("Wrong: Empty token %+v was deemed non-empty", emptyToken)
+	}
+
+}

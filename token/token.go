@@ -26,6 +26,11 @@ func New(tokenType TokenType, literal string) Token {
 	}
 }
 
+// IsEmpty Checks wheter token fields are set
+func (token Token) IsEmpty() bool {
+	return token.Type == "" && token.Literal == ""
+}
+
 // keywords Map of keywords to token type
 var keywords = map[string]TokenType{
 	"fn":     FUNCTION,
