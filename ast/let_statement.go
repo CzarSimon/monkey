@@ -1,8 +1,6 @@
 package ast
 
-import (
-	"github.com/CzarSimon/monkey/token"
-)
+import "github.com/CzarSimon/monkey/token"
 
 // LetStatement AST node for variable assignement
 type LetStatement struct {
