@@ -1,6 +1,10 @@
 package ast
 
-import "github.com/CzarSimon/monkey/token"
+import (
+	"bytes"
+
+	"github.com/CzarSimon/monkey/token"
+)
 
 // LetStatement AST node for variable assignement
 type LetStatement struct {
@@ -21,4 +25,16 @@ func NewLetStatement(tok token.Token) *LetStatement {
 	return &LetStatement{
 		Token: tok,
 	}
+}
+
+// String Returns a string representation of the LetStatement node
+func (letStmt *LetStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(letStmt.TokenLiteral() + " ")
+	out.WriteString(letStmt.Name.String() + " = ")
+	if letStmt.Value != nil {
+		out.WriteString(letStmt.Value.String())
+	}
+	out.WriteString(";")
+	return out.String()
 }

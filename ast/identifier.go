@@ -24,3 +24,8 @@ func NewIdentifier(tok token.Token, value string) *Identifier {
 		Value: value,
 	}
 }
+
+// String Returns a string representation of the Identifier node
+func (id *Identifier) String() string {
+	return id.Value
+}

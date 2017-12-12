@@ -1,6 +1,10 @@
 package ast
 
-import "github.com/CzarSimon/monkey/token"
+import (
+	"bytes"
+
+	"github.com/CzarSimon/monkey/token"
+)
 
 // ReturnStatement AST node for retrning the value of an expression
 type ReturnStatement struct {
@@ -20,4 +24,15 @@ func NewReturnStatement(tok token.Token) *ReturnStatement {
 	return &ReturnStatement{
 		Token: tok,
 	}
+}
+
+// String Returns a string representation of the ReturnStatement node
+func (returnStmt *ReturnStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString(returnStmt.TokenLiteral() + " ")
+	if returnStmt.ReturnValue != nil {
+		out.WriteString(returnStmt.ReturnValue.String())
+	}
+	out.WriteString(";")
+	return out.String()
 }
