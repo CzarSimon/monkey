@@ -10,6 +10,8 @@ func (parser *Parser) parseStatement() (ast.Statement, error) {
 	switch parser.currentToken.Type {
 	case token.LET:
 		return parser.parseLetStatement()
+	case token.RETRUN:
+		return parser.parseReturnStatement()
 	default:
 		return nil, nil
 	}
@@ -25,6 +27,17 @@ func (parser *Parser) parseLetStatement() (*ast.LetStatement, error) {
 	if err := parser.expectPeek(token.ASSIGN); err != nil {
 		return nil, err
 	}
+	// TODO: Write expression parsing
+	for !parser.currentTokenIs(token.SEMICOLON) {
+		parser.nextToken()
+	}
+	return stmt, nil
+}
+
+// parseReturnStatement Parses a ReturnStatement
+func (parser *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
+	stmt := ast.NewReturnStatement(parser.currentToken)
+	parser.nextToken()
 	// TODO: Write expression parsing
 	for !parser.currentTokenIs(token.SEMICOLON) {
 		parser.nextToken()
