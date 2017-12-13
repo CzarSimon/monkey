@@ -13,7 +13,7 @@ func (parser *Parser) parseStatement() (ast.Statement, error) {
 	case token.RETRUN:
 		return parser.parseReturnStatement()
 	default:
-		return nil, nil
+		return parser.parseExpressionStatement()
 	}
 }
 
@@ -43,4 +43,19 @@ func (parser *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 		parser.nextToken()
 	}
 	return stmt, nil
+}
+
+// parseExpressionStatement Parses an ExpressionStatement
+func (parser *Parser) parseExpressionStatement() (*ast.ExpressionStatement, error) {
+	stmt := ast.NewExpressionStatement(parser.currentToken)
+	stmt.Expression = parser.parseExpression(LOWEST)
+	if parser.peekTokenIs(token.SEMICOLON) {
+		parser.nextToken()
+	}
+	return stmt, nil
+}
+
+// parseIdentifier Parses an identifier
+func (parser *Parser) parseIdentifier() ast.Expression {
+	return ast.NewIdentifier(parser.currentToken, parser.currentToken.Literal)
 }

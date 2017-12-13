@@ -13,34 +13,18 @@ type testStatement struct {
 
 func TestLetStatements(t *testing.T) {
 	input := `
-  let x 5;
-  let = 10;
-  let 838383;
 	let x = 5;
   let y = 10;
   let foobar = 838383;
   `
 	noStatements := 3
-	expectedErrors := []string{
-		"peekToken: Expected type== Got=INT",
-		"peekToken: Expected type=IDENT Got==",
-		"peekToken: Expected type=IDENT Got=INT",
-	}
-
-	lex := lexer.New(input)
-	parser := New(lex)
-
-	program := parser.ParseProgram()
-
-	checkParserErrors(t, parser, expectedErrors)
+	expectedErrors := []string{}
+	program := testParseProgram(t, input, expectedErrors)
 
 	if program == nil {
 		t.Fatalf("ParseProgram() returned nil")
 	}
-	if len(program.Statements) != noStatements {
-		t.Fatalf("Wrong number of program statemets. Expected=%d got=%d",
-			noStatements, len(program.Statements))
-	}
+	testNumberOfStatemets(t, program, noStatements)
 	testStatements := []testStatement{{"x"}, {"y"}, {"foobar"}}
 	for i, testStmt := range testStatements {
 		stmt := program.Statements[i]
@@ -81,21 +65,12 @@ func TestReturnStatement(t *testing.T) {
 	return 10;
 	return 993322;`
 	noStatements := 3
-
-	lex := lexer.New(input)
-	parser := New(lex)
-
-	program := parser.ParseProgram()
-
-	checkParserErrors(t, parser, []string{})
+	program := testParseProgram(t, input, []string{})
 
 	if program == nil {
 		t.Fatalf("ParseProgram() returned nil")
 	}
-	if len(program.Statements) != noStatements {
-		t.Fatalf("Wrong number of program statemets. Expected=%d got=%d",
-			noStatements, len(program.Statements))
-	}
+	testNumberOfStatemets(t, program, noStatements)
 	for _, stmt := range program.Statements {
 		returnStmt, ok := stmt.(*ast.ReturnStatement)
 		if !ok {
@@ -105,6 +80,37 @@ func TestReturnStatement(t *testing.T) {
 		if returnStmt.TokenLiteral() != "return" {
 			t.Errorf("returnStmt.TokenLiteral not 'return' Got=‰q", returnStmt.TokenLiteral())
 		}
+	}
+}
+
+func testParseProgram(t *testing.T, input string, expectedErrors []string) *ast.Program {
+	lex := lexer.New(input)
+	parser := New(lex)
+	program := parser.ParseProgram()
+	checkParserErrors(t, parser, expectedErrors)
+	return program
+}
+
+func TestIndentifierExpression(t *testing.T) {
+	input := "foobar;"
+	expectedErrors := []string{}
+	program := testParseProgram(t, input, expectedErrors)
+	testNumberOfStatemets(t, program, 1)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. Got=%T",
+			program.Statements[0])
+	}
+	ident, ok := stmt.Expression.(*ast.Identifier)
+	if !ok {
+		t.Fatalf("expresion is not an ast.Identifier. Got=%T",
+			stmt.Expression)
+	}
+	if ident.Value != "foobar" {
+		t.Errorf("ident.Value not %s. Got=%s", "foobar", ident.Value)
+	}
+	if ident.TokenLiteral() != "foobar" {
+		t.Errorf("ident.TokenLiteral not %s. Got=%s", "foobar", ident.TokenLiteral())
 	}
 }
 
@@ -124,4 +130,11 @@ func checkParserErrors(t *testing.T, parser *Parser, expectedErrors []string) {
 		t.Errorf("parser error: %s", err.Error())
 	}
 	t.FailNow()
+}
+
+func testNumberOfStatemets(t *testing.T, program *ast.Program, expectedNoStmts int) {
+	if len(program.Statements) != expectedNoStmts {
+		t.Fatalf("Wrong number of program statemets. Expected=%d got=%d",
+			expectedNoStmts, len(program.Statements))
+	}
 }

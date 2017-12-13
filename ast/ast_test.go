@@ -76,3 +76,40 @@ func TestExpressionStatement(t *testing.T) {
 			stmt.String())
 	}
 }
+
+func TestIntegerLiteral(t *testing.T) {
+	intLit, err := NewIntegerLiteral(token.New(token.FUNCTION, "5"))
+	if intLit != nil {
+		t.Errorf("Expected intLit to be got=[ %+q ]", intLit)
+	}
+	if err == nil {
+		t.Errorf(
+			"Expected error to be=[ Unexpected TokenType. Expected=INT Got=%s ] Got=nil",
+			token.FUNCTION)
+	}
+	intLit, err = NewIntegerLiteral(token.New(token.INT, "badValue"))
+	if intLit != nil {
+		t.Errorf("Expected intLit to be got=[ %+q ]", intLit)
+	}
+	if err == nil {
+		t.Errorf("Expected parse error got nil")
+	}
+	intLit, err = NewIntegerLiteral(token.New(token.INT, "10"))
+	if intLit == nil {
+		t.Errorf("Expected non-nil IntegerLiteral Got nil")
+	}
+	if err != nil {
+		t.Errorf("Expected no error, Got=[ %s ]", err.Error())
+	}
+	intLit.expressionNode()
+	if intLit.TokenLiteral() != "10" {
+		t.Errorf("intLit.TokenLiteral() wrong. Expected=10, Got=%s",
+			intLit.TokenLiteral())
+	}
+	if intLit.String() != "10" {
+		t.Errorf("intLit.String() wrong. Expected=10, Got=%s", intLit.String())
+	}
+	if intLit.Value != 10 {
+		t.Errorf("intLit.Valeu wrong. Expected=10, Got=%d", intLit.Value)
+	}
+}
