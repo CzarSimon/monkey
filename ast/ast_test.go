@@ -152,3 +152,32 @@ func TestPrefixExpression(t *testing.T) {
 		}
 	}
 }
+
+func TestInfixExpression(t *testing.T) {
+	validTokens := []struct {
+		token          token.Token
+		literal        string
+		expectedString string
+	}{
+		{token.New(token.PLUS, "+"), "+", "(5 + 5)"},
+		{token.New(token.MULTIPLY, "*"), "*", "(5 * 5)"},
+	}
+	intLiteral, _ := NewIntegerLiteral(token.New(token.INT, "5"))
+	for i, validToken := range validTokens {
+		infixExpr := NewInfixExpression(validToken.token)
+		if infixExpr == nil {
+			t.Errorf("Expected non-nil InfixExpression Got nil")
+		}
+		infixExpr.Left = intLiteral
+		infixExpr.Right = intLiteral
+		infixExpr.expressionNode()
+		if infixExpr.TokenLiteral() != validToken.literal {
+			t.Errorf("%d - Wrong infixExpr.TokenLiteral(), Expected=%s Got=%s",
+				i, validToken.literal, infixExpr.TokenLiteral())
+		}
+		if infixExpr.String() != validToken.expectedString {
+			t.Errorf("%d - Wrong prefixExpr.String() Exprected=%s Got=%s",
+				i, validToken.expectedString, infixExpr.String())
+		}
+	}
+}

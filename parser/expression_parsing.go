@@ -13,6 +13,7 @@ type (
 func (parser *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := parser.getCurrentTokensPrefixFn()
 	if prefix == nil {
+		parser.noPrefixParseFnError(parser.currentToken.Type)
 		return nil
 	}
 	leftExp := prefix()
@@ -31,4 +32,16 @@ func (parser *Parser) praseIntegerLiteral() ast.Expression {
 		parser.AddError(err)
 	}
 	return literal
+}
+
+// parsePrefixExpression Parses an PrefixExpression
+func (parser *Parser) parsePrefixExpression() ast.Expression {
+	prefixExpr, err := ast.NewPrefixExpression(parser.currentToken)
+	if err != nil {
+		parser.AddError(err)
+		return nil
+	}
+	parser.nextToken()
+	prefixExpr.Right = parser.parseExpression(PREFIX)
+	return prefixExpr
 }

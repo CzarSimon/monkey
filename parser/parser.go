@@ -41,6 +41,8 @@ func New(lex *lexer.Lexer) *Parser {
 	}
 	parser.registerPrefix(token.IDENT, parser.parseIdentifier)
 	parser.registerPrefix(token.INT, parser.praseIntegerLiteral)
+	parser.registerPrefix(token.NOT, parser.parsePrefixExpression)
+	parser.registerPrefix(token.MINUS, parser.parsePrefixExpression)
 	parser.nextToken()
 	parser.nextToken()
 	return parser
@@ -110,6 +112,13 @@ func (parser *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn
 // getCurrentTokensPrefixFn Gets the prefix function of the currentToken
 func (parser *Parser) getCurrentTokensPrefixFn() prefixParseFn {
 	return parser.prefixParseFns[parser.currentToken.Type]
+}
+
+// noPrefixParseFnError Creates and adds an error when no prefixParseFn is
+// found for a given token type
+func (parser *Parser) noPrefixParseFnError(tokenType token.TokenType) {
+	err := fmt.Errorf("No prefixParseFn for TokenType=%s found", tokenType)
+	parser.AddError(err)
 }
 
 // registerInfix Adds a infix function to a particular token type

@@ -7,7 +7,8 @@ import (
 	"github.com/CzarSimon/monkey/token"
 )
 
-// PrefixExpression AST node represneting a prefix expression
+// PrefixExpression AST node representing an expression preceeded
+// by a prefix operator
 type PrefixExpression struct {
 	Token    token.Token
 	Operator string
