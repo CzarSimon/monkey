@@ -54,8 +54,3 @@ func (parser *Parser) parseExpressionStatement() (*ast.ExpressionStatement, erro
 	}
 	return stmt, nil
 }
-
-// parseIdentifier Parses an identifier
-func (parser *Parser) parseIdentifier() ast.Expression {
-	return ast.NewIdentifier(parser.currentToken, parser.currentToken.Literal)
-}

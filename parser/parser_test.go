@@ -114,6 +114,26 @@ func TestIndentifierExpression(t *testing.T) {
 	}
 }
 
+func TestIntegerLiteral(t *testing.T) {
+	input := "5;"
+	program := testParseProgram(t, input, []string{})
+	testNumberOfStatemets(t, program, 1)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("stmt not an *ast.ExpressionStatement, Got=%T", program.Statements[0])
+	}
+	literal, ok := stmt.Expression.(*ast.IntegerLiteral)
+	if !ok {
+		t.Fatalf("stmt.Expression not an ast.IntegerLiteral Got=%T", stmt.Expression)
+	}
+	if literal.Value != 5 {
+		t.Fatalf("Wrong literal.Value Expected=5 Got=%d", literal.Value)
+	}
+	if literal.TokenLiteral() != "5" {
+		t.Fatalf("Wrong literal.TokenLiteral() Expected=5 Got=%s", literal.TokenLiteral())
+	}
+}
+
 func checkParserErrors(t *testing.T, parser *Parser, expectedErrors []string) {
 	errors := parser.Errors()
 	if len(errors) == len(expectedErrors) {

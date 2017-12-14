@@ -15,15 +15,17 @@ type IntegerLiteral struct {
 
 func (intLiteral *IntegerLiteral) expressionNode() {}
 
+// TokenLiteral Returns the integer literal as a string
 func (intLiteral *IntegerLiteral) TokenLiteral() string {
 	return intLiteral.Token.Literal
 }
 
+// String Returns string representation of IntegerLiteral
 func (intLiteral *IntegerLiteral) String() string {
 	return intLiteral.TokenLiteral()
 }
 
-// NewIntegerLiteral Creates a new lite
+// NewIntegerLiteral Creates a new IntegerLiteral
 func NewIntegerLiteral(tok token.Token) (*IntegerLiteral, error) {
 	if tok.Type != token.INT {
 		return nil, fmt.Errorf("Unexpected TokenType. Expected=INT Got=%s", tok.Type)
