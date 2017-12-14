@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/CzarSimon/monkey/ast"
@@ -132,6 +133,52 @@ func TestIntegerLiteral(t *testing.T) {
 	if literal.TokenLiteral() != "5" {
 		t.Fatalf("Wrong literal.TokenLiteral() Expected=5 Got=%s", literal.TokenLiteral())
 	}
+}
+
+func TestParsingPrefixExpressions(t *testing.T) {
+	prefixTests := []struct {
+		input        string
+		operator     string
+		integerValue int64
+	}{
+		{"!5", "!", 5},
+		{"-15", "-", 15},
+	}
+	for _, test := range prefixTests {
+		program := testParseProgram(t, test.input, []string{})
+		testNumberOfStatemets(t, program, 1)
+		stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("stmt not an *ast.ExpressionStatement, Got=%T", program.Statements[0])
+		}
+		exp, ok := stmt.Expression.(*ast.PrefixExpression)
+		if !ok {
+			t.Fatalf("stmt.Expression not an *ast.PrefixExpression, Got=%T", stmt.Expression)
+		}
+		if exp.Operator != test.operator {
+			t.Fatalf("Wrong exp.Operator Expected=%s Got=%s", test.operator, exp.Operator)
+		}
+		if !testIntegerLiteral(t, exp.Right, test.integerValue) {
+			return
+		}
+	}
+}
+
+func testIntegerLiteral(t *testing.T, exp ast.Expression, value int64) bool {
+	intLiteral, ok := exp.(*ast.IntegerLiteral)
+	if !ok {
+		t.Errorf("exp not and ast.IntegerLiteral Got=%T", exp)
+		return false
+	}
+	if intLiteral.Value != value {
+		t.Errorf("Wrong intLiteral.Value Exptected=%d Got=%d", value, intLiteral.Value)
+		return false
+	}
+	if intLiteral.TokenLiteral() != fmt.Sprintf("%d", value) {
+		t.Errorf("Wrong intLiteral.Value Exptected=%d Got=%s",
+			intLiteral.Value, intLiteral.TokenLiteral())
+	}
+	return true
 }
 
 func checkParserErrors(t *testing.T, parser *Parser, expectedErrors []string) {

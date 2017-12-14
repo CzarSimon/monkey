@@ -89,7 +89,7 @@ func TestIntegerLiteral(t *testing.T) {
 	}
 	intLit, err = NewIntegerLiteral(token.New(token.INT, "badValue"))
 	if intLit != nil {
-		t.Errorf("Expected intLit to be got=[ %+q ]", intLit)
+		t.Errorf("Expected intLit to be nil got=[ %+q ]", intLit)
 	}
 	if err == nil {
 		t.Errorf("Expected parse error got nil")
@@ -111,5 +111,44 @@ func TestIntegerLiteral(t *testing.T) {
 	}
 	if intLit.Value != 10 {
 		t.Errorf("intLit.Valeu wrong. Expected=10, Got=%d", intLit.Value)
+	}
+}
+
+func TestPrefixExpression(t *testing.T) {
+	prefixExpr, err := NewPrefixExpression(token.New(token.COMMA, ","))
+	if prefixExpr != nil {
+		t.Errorf("Expected prefixExpr to be nil got=[ %+q ]", prefixExpr)
+	}
+	if err == nil {
+		t.Errorf(
+			"Expected error to be=[ Invalid token type %s supplied ] Got=nil",
+			token.COMMA)
+	}
+	validTokens := []struct {
+		token          token.Token
+		literal        string
+		expectedString string
+	}{
+		{token.New(token.NOT, "!"), "!", "(!5)"},
+		{token.New(token.MINUS, "-"), "-", "(-5)"},
+	}
+	for i, validToken := range validTokens {
+		prefixExpr, err = NewPrefixExpression(validToken.token)
+		if err != nil {
+			t.Errorf("%d - Expected no error, Got=[ %s ]", i, err.Error())
+		}
+		if prefixExpr == nil {
+			t.Errorf("Expected non-nil PrefixExpression Got nil")
+		}
+		prefixExpr.Right, _ = NewIntegerLiteral(token.New(token.INT, "5"))
+		prefixExpr.expressionNode()
+		if prefixExpr.TokenLiteral() != validToken.literal {
+			t.Errorf("%d - Wrong prefixExpr.TokenLiteral(), Expected=%s Got=%s",
+				i, validToken.literal, prefixExpr.TokenLiteral())
+		}
+		if prefixExpr.String() != validToken.expectedString {
+			t.Errorf("%d - Wrong prefixExpr.String() Exprected=%s Got=%s",
+				i, validToken.expectedString, prefixExpr.String())
+		}
 	}
 }
