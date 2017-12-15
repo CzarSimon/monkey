@@ -198,3 +198,47 @@ func TestBoolean(t *testing.T) {
 		t.Fatalf("Wrong b.String Expected=true Got=%s", b.String())
 	}
 }
+
+func TestBlockStatement(t *testing.T) {
+	block := getTestBlockStatment(t)
+	block.statementNode()
+	if len(block.Statements) != 1 {
+		t.Fatalf("Unexpected number of statements. Expected=1, Got=%s", len(block.Statements))
+	}
+	exprectedString := "x"
+	if block.String() != exprectedString {
+		t.Fatalf("block.String() wrong Expected=%s Got=%s", exprectedString, block.String())
+	}
+}
+
+func TestIFExprssion(t *testing.T) {
+	ifExpr := NewIFExpression(token.New(token.IF, "if"))
+	ifExpr.Condition = NewBoolean(token.New(token.TRUE, "true"))
+	ifExpr.Consequence = getTestBlockStatment(t)
+	ifExpr.expressionNode()
+	if ifExpr.TokenLiteral() != "if" {
+		t.Fatalf("ifExpr.TokenLiteral wrong. Expected=if Got=%s", ifExpr.TokenLiteral())
+	}
+	expectedStr1 := "if true x"
+	if ifExpr.String() != expectedStr1 {
+		t.Fatalf("ifExpr.String() wrong Expected=[ %s ] Got= [ %s ]",
+			expectedStr1, ifExpr.String())
+	}
+	ifExpr.Alternative = getTestBlockStatment(t)
+	expectedStr2 := "if true x else x"
+	if ifExpr.String() != expectedStr2 {
+		t.Fatalf("ifExpr.String() wrong Expected=[ %s ] Got= [ %s ]",
+			expectedStr2, ifExpr.String())
+	}
+}
+
+func getTestBlockStatment(t *testing.T) *BlockStatement {
+	block := NewBlockStatement(token.New(token.LBRACE, "{"))
+	if block.TokenLiteral() != "{" {
+		t.Fatalf("block.TokenLiteral wrong. Expected={ Got=%s", block.TokenLiteral())
+	}
+	stmt := NewExpressionStatement(token.New(token.IDENT, "x"))
+	stmt.Expression = NewIdentifier(token.New(token.IDENT, "x"), "x")
+	block.AddStatements(stmt)
+	return block
+}

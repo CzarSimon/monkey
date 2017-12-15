@@ -137,12 +137,14 @@ func TestIntegerLiteral(t *testing.T) {
 
 func TestParsingPrefixExpressions(t *testing.T) {
 	prefixTests := []struct {
-		input        string
-		operator     string
-		integerValue int64
+		input    string
+		operator string
+		value    interface{}
 	}{
 		{"!5", "!", 5},
 		{"-15", "-", 15},
+		{"!true", "!", true},
+		{"!false", "!", false},
 	}
 	for _, test := range prefixTests {
 		program := testParseProgram(t, test.input, []string{})
@@ -158,7 +160,7 @@ func TestParsingPrefixExpressions(t *testing.T) {
 		if exp.Operator != test.operator {
 			t.Fatalf("Wrong exp.Operator Expected=%s Got=%s", test.operator, exp.Operator)
 		}
-		if !testIntegerLiteral(t, exp.Right, test.integerValue) {
+		if !testLiteralExpression(t, exp.Right, test.value) {
 			return
 		}
 	}
@@ -167,9 +169,9 @@ func TestParsingPrefixExpressions(t *testing.T) {
 func TestParsingInfixExpressions(t *testing.T) {
 	prefixTests := []struct {
 		input      string
-		leftValue  int64
+		leftValue  interface{}
 		operator   string
-		rightValue int64
+		rightValue interface{}
 	}{
 		{"5 + 5", 5, "+", 5},
 		{"15 - 15", 15, "-", 15},
@@ -179,6 +181,9 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"7 != 6", 7, "!=", 6},
 		{"3 > 11", 3, ">", 11},
 		{"12 < 9", 12, "<", 9},
+		{"true == true", true, "==", true},
+		{"true != false", true, "!=", false},
+		{"false == false", false, "==", false},
 	}
 	for _, test := range prefixTests {
 		program := testParseProgram(t, test.input, []string{})
@@ -195,8 +200,12 @@ func TestParsingInfixExpressions(t *testing.T) {
 			t.Fatalf("Wrong exp.Operator Expected=%s Got=%s",
 				test.operator, infixExpr.Operator)
 		}
-		testIntegerLiteral(t, infixExpr.Left, test.leftValue)
-		testIntegerLiteral(t, infixExpr.Right, test.rightValue)
+		if !testLiteralExpression(t, infixExpr.Left, test.leftValue) {
+			return
+		}
+		if !testLiteralExpression(t, infixExpr.Right, test.rightValue) {
+			return
+		}
 	}
 }
 
@@ -216,6 +225,15 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		{"5 > 4 == 3 < 4", "((5 > 4) == (3 < 4))"},
 		{"5 > 4 != 3 < 4", "((5 > 4) != (3 < 4))"},
 		{"3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"},
+		{"true", "true"},
+		{"false", "false"},
+		{"3 > 5 == false", "((3 > 5) == false)"},
+		{"3 < 5 == false", "((3 < 5) == false)"},
+		{"1 + (2 + 3) + 4", "((1 + (2 + 3)) + 4)"},
+		{"(5 + 5) * 2", "((5 + 5) * 2)"},
+		{"2 / (5 + 5)", "(2 / (5 + 5))"},
+		{"-(5 + 5)", "(-(5 + 5))"},
+		{"!(true == true)", "(!(true == true))"},
 	}
 	for _, test := range tests {
 		program := testParseProgram(t, test.input, []string{})
@@ -295,6 +313,8 @@ func testLiteralExpression(t *testing.T, exp ast.Expression, expected interface{
 		return testIntegerLiteral(t, exp, v)
 	case string:
 		return testIdentifier(t, exp, v)
+	case bool:
+		return testBooleanLiteral(t, exp, v)
 	}
 	t.Errorf("type of exp not hadled Got=%T", exp)
 	return false
@@ -320,6 +340,23 @@ func testInfixExpression(
 		return false
 	}
 	if !testLiteralExpression(t, opExp.Right, right) {
+		return false
+	}
+	return true
+}
+
+func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
+	b, ok := exp.(*ast.Boolean)
+	if !ok {
+		t.Errorf("exp is not ast.Boolean Got=%T", exp)
+		return false
+	}
+	if b.Value != value {
+		t.Errorf("Wrong b.Value Expected=%t Got=%t", value, b.Value)
+		return false
+	}
+	if b.TokenLiteral() != fmt.Sprintf("%t", value) {
+		t.Errorf("Wrong b.TokenLiteral() Expected=%t Got=%s", value, b.TokenLiteral())
 		return false
 	}
 	return true

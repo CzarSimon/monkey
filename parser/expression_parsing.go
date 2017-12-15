@@ -64,3 +64,19 @@ func (parser *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	expression.Right = parser.parseExpression(precedence)
 	return expression
 }
+
+// parseBoolean Parses an BooleanExpression represntig a boolen value
+func (parser *Parser) parseBoolean() ast.Expression {
+	return ast.NewBoolean(parser.currentToken)
+}
+
+// parseGroupedExpression Parses a GroupedExpression
+func (parser *Parser) parseGroupedExpression() ast.Expression {
+	parser.nextToken()
+	expression := parser.parseExpression(LOWEST)
+	if err := parser.expectPeek(token.RPAREN); err != nil {
+		parser.AddError(err)
+		return nil
+	}
+	return expression
+}
