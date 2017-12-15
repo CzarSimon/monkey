@@ -43,6 +43,14 @@ func New(lex *lexer.Lexer) *Parser {
 	parser.registerPrefix(token.INT, parser.praseIntegerLiteral)
 	parser.registerPrefix(token.NOT, parser.parsePrefixExpression)
 	parser.registerPrefix(token.MINUS, parser.parsePrefixExpression)
+	parser.registerInfix(token.PLUS, parser.parseInfixExpression)
+	parser.registerInfix(token.MINUS, parser.parseInfixExpression)
+	parser.registerInfix(token.DIVIDE, parser.parseInfixExpression)
+	parser.registerInfix(token.MULTIPLY, parser.parseInfixExpression)
+	parser.registerInfix(token.EQ, parser.parseInfixExpression)
+	parser.registerInfix(token.NOT_EQ, parser.parseInfixExpression)
+	parser.registerInfix(token.LT, parser.parseInfixExpression)
+	parser.registerInfix(token.GT, parser.parseInfixExpression)
 	parser.nextToken()
 	parser.nextToken()
 	return parser
@@ -126,7 +134,23 @@ func (parser *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) 
 	parser.infixParseFns[tokenType] = fn
 }
 
-// getCurrentTokensinfixFn Gets the infix function of the currentToken
-func (parser *Parser) getCurrentTokensInfixFn() infixParseFn {
-	return parser.infixParseFns[parser.currentToken.Type]
+// getPeekTokensinfixFn Gets the infix function of the peekToken
+func (parser *Parser) getPeekTokensInfixFn() infixParseFn {
+	return parser.infixParseFns[parser.peekToken.Type]
+}
+
+// currentPrecedence Checks the precedence of the next token
+func (parser *Parser) currentPrecedence() int {
+	if precedence, ok := precedences[parser.currentToken.Type]; ok {
+		return precedence
+	}
+	return LOWEST
+}
+
+// peekPrecedence Checks the precedence of the next token
+func (parser *Parser) peekPrecedence() int {
+	if precedence, ok := precedences[parser.peekToken.Type]; ok {
+		return precedence
+	}
+	return LOWEST
 }

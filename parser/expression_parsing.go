@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/CzarSimon/monkey/ast"
+	"github.com/CzarSimon/monkey/token"
 )
 
 type (
@@ -17,6 +18,14 @@ func (parser *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 	leftExp := prefix()
+	for !parser.peekTokenIs(token.SEMICOLON) && precedence < parser.peekPrecedence() {
+		infix := parser.getPeekTokensInfixFn()
+		if infix == nil {
+			return leftExp
+		}
+		parser.nextToken()
+		leftExp = infix(leftExp)
+	}
 	return leftExp
 }
 
@@ -44,4 +53,14 @@ func (parser *Parser) parsePrefixExpression() ast.Expression {
 	parser.nextToken()
 	prefixExpr.Right = parser.parseExpression(PREFIX)
 	return prefixExpr
+}
+
+// parseInfixExpression Parses an InfixExpression
+func (parser *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+	expression := ast.NewInfixExpression(parser.currentToken)
+	expression.Left = left
+	precedence := parser.currentPrecedence()
+	parser.nextToken()
+	expression.Right = parser.parseExpression(precedence)
+	return expression
 }
