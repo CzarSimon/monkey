@@ -181,3 +181,20 @@ func TestInfixExpression(t *testing.T) {
 		}
 	}
 }
+
+func TestBoolean(t *testing.T) {
+	falseToken := token.New(token.FALSE, "false")
+	trueToken := token.New(token.TRUE, "true")
+	b := NewBoolean(falseToken)
+	if b.Value {
+		t.Fatalf("Wrong b.Value Expected=false Got=true")
+	}
+	b = NewBoolean(trueToken)
+	if !b.Value {
+		t.Fatalf("Wrong b.Value Expected=true Got=false")
+	}
+	b.expressionNode()
+	if b.String() != "true" {
+		t.Fatalf("Wrong b.String Expected=true Got=%s", b.String())
+	}
+}
