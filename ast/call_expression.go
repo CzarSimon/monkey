@@ -35,8 +35,9 @@ func (call *CallExpression) String() string {
 }
 
 // NewCallExpression Creates a new CallExpression and retruns a reference to it
-func NewCallExpression(tok token.Token) *CallExpression {
+func NewCallExpression(tok token.Token, function Expression) *CallExpression {
 	return &CallExpression{
-		Token: tok,
+		Token:    tok,
+		Function: function,
 	}
 }

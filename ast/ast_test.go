@@ -260,8 +260,9 @@ func getTestBlockStatment(t *testing.T) *BlockStatement {
 }
 
 func TestCallExpression(t *testing.T) {
-	call := NewCallExpression(token.New(token.LPAREN, "("))
-	call.Function = NewIdentifier(token.New(token.IDENT, "add"), "add")
+	call := NewCallExpression(
+		token.New(token.LPAREN, "("),
+		NewIdentifier(token.New(token.IDENT, "add"), "add"))
 	call.Arguments = []Expression{
 		NewIdentifier(token.New(token.IDENT, "x"), "x"),
 		NewIdentifier(token.New(token.IDENT, "y"), "y"),

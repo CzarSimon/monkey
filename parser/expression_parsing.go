@@ -149,3 +149,8 @@ func (parser *Parser) parseFunctionParameters() []*ast.Identifier {
 	}
 	return params
 }
+
+// parseCallExpression Parses a CallExpression
+func (parser *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+	call := ast.NewCallExpression(parser.currentToken)
+}

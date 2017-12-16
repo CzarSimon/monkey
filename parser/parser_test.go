@@ -374,6 +374,31 @@ func TestFunctionParameterParsing(t *testing.T) {
 	}
 }
 
+func TestCallExpressionParsing(t *testing.T) {
+	input := "add(1, 2 * 3, 4 + 5)"
+	program := testParseProgram(t, input, []string{})
+	testNumberOfStatemets(t, program, 1)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("stmt is not ast.ExpressionStatement Got=%T",
+			program.Statements[0])
+	}
+	call, ok := stmt.Expression.(*ast.CallExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.CallExpression Got=%T",
+			stmt.Expression)
+	}
+	if !testIdentifier(t, call.Function, "add") {
+		return
+	}
+	if len(call.Arguments) != 3 {
+		t.Fatalf("Wrong number of arguments Exprected=3 Got=%d", len(call.Arguments))
+	}
+	testLiteralExpression(t, call.Arguments[0], 1)
+	testInfixExpression(t, call.Arguments[1], 2, "*", 3)
+	testInfixExpression(t, call.Arguments[2], 4, "+", 5)
+}
+
 func testIntegerLiteral(t *testing.T, exp ast.Expression, value int64) bool {
 	intLiteral, ok := exp.(*ast.IntegerLiteral)
 	if !ok {
