@@ -244,6 +244,82 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 	}
 }
 
+func TestIfExpression(t *testing.T) {
+	input := "if (x < y) { x }"
+	program := testParseProgram(t, input, []string{})
+	testNumberOfStatemets(t, program, 1)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("stmt not an *ast.ExpressionStatement, Got=%T", program.Statements[0])
+	}
+	ifExpr, ok := stmt.Expression.(*ast.IFExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression not an *ast.IFExpression, Got=%T", stmt.Expression)
+	}
+	if !testInfixExpression(t, ifExpr.Condition, "x", "<", "y") {
+		return
+	}
+	if len(ifExpr.Consequence.Statements) != 1 {
+		t.Fatalf(
+			"Unexpected number of statements in ifExpr.Consequence Expected=1 Got=%d",
+			len(ifExpr.Consequence.Statements))
+	}
+	cons, ok := ifExpr.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("cons not an *ast.ExpressionStatement, Got=%T",
+			ifExpr.Consequence.Statements[0])
+	}
+	if !testIdentifier(t, cons.Expression, "x") {
+		return
+	}
+	if ifExpr.Alternative != nil {
+		t.Errorf("ifExpr.Alternaive was not nil Got=%+v", ifExpr.Alternative)
+	}
+}
+
+func TestIfElseExpression(t *testing.T) {
+	input := "if (x < y) { x } else { y }"
+	program := testParseProgram(t, input, []string{})
+	testNumberOfStatemets(t, program, 1)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("stmt not an *ast.ExpressionStatement, Got=%T", program.Statements[0])
+	}
+	ifExpr, ok := stmt.Expression.(*ast.IFExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression not an *ast.IFExpression, Got=%T", stmt.Expression)
+	}
+	if !testInfixExpression(t, ifExpr.Condition, "x", "<", "y") {
+		return
+	}
+	if len(ifExpr.Consequence.Statements) != 1 {
+		t.Fatalf(
+			"Unexpected number of statements in ifExpr.Consequence Expected=1 Got=%d",
+			len(ifExpr.Consequence.Statements))
+	}
+	cons, ok := ifExpr.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("cons not an *ast.ExpressionStatement, Got=%T",
+			ifExpr.Consequence.Statements[0])
+	}
+	if !testIdentifier(t, cons.Expression, "x") {
+		return
+	}
+	if len(ifExpr.Alternative.Statements) != 1 {
+		t.Fatalf(
+			"Unexpected number of statements in ifExpr.Alternative Expected=1 Got=%d",
+			len(ifExpr.Alternative.Statements))
+	}
+	alt, ok := ifExpr.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("cons not an *ast.ExpressionStatement, Got=%T",
+			ifExpr.Alternative.Statements[0])
+	}
+	if !testIdentifier(t, alt.Expression, "y") {
+		return
+	}
+}
+
 func testIntegerLiteral(t *testing.T, exp ast.Expression, value int64) bool {
 	intLiteral, ok := exp.(*ast.IntegerLiteral)
 	if !ok {

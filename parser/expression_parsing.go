@@ -80,3 +80,32 @@ func (parser *Parser) parseGroupedExpression() ast.Expression {
 	}
 	return expression
 }
+
+// parseIfExpression Parses a IFExpression
+func (parser *Parser) parseIfExpression() ast.Expression {
+	expression := ast.NewIFExpression(parser.currentToken)
+	if err := parser.expectPeek(token.LPAREN); err != nil {
+		parser.AddError(err)
+		return nil
+	}
+	parser.nextToken()
+	expression.Condition = parser.parseExpression(LOWEST)
+	if err := parser.expectPeek(token.RPAREN); err != nil {
+		parser.AddError(err)
+		return nil
+	}
+	if err := parser.expectPeek(token.LBRACE); err != nil {
+		parser.AddError(err)
+		return nil
+	}
+	expression.Consequence = parser.parseBlockStatement()
+	if parser.peekTokenIs(token.ELSE) {
+		parser.nextToken()
+		if err := parser.expectPeek(token.LBRACE); err != nil {
+			parser.AddError(err)
+			return nil
+		}
+		expression.Alternative = parser.parseBlockStatement()
+	}
+	return expression
+}

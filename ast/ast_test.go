@@ -232,6 +232,22 @@ func TestIFExprssion(t *testing.T) {
 	}
 }
 
+func TestFunctionLiteral(t *testing.T) {
+	fn := NewFunctionLiteral(token.New(token.FUNCTION, "fn"))
+	fn.AddParam(NewIdentifier(token.New(token.IDENT, "x"), "x"))
+	fn.AddParam(NewIdentifier(token.New(token.IDENT, "y"), "y"))
+	fn.Body = getTestBlockStatment(t)
+	fn.expressionNode()
+	if fn.TokenLiteral() != "fn" {
+		t.Fatalf("fn.TokenLiteral wrong Exprected=fn Got=%s", fn.TokenLiteral())
+	}
+	expectedStr := "fn(x, y) x"
+	if fn.String() != expectedStr {
+		t.Fatalf("fn.String() wrong Expected=[ %s ] Got= [ %s ]",
+			expectedStr, fn.String())
+	}
+}
+
 func getTestBlockStatment(t *testing.T) *BlockStatement {
 	block := NewBlockStatement(token.New(token.LBRACE, "{"))
 	if block.TokenLiteral() != "{" {

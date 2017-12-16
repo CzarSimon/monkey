@@ -54,3 +54,19 @@ func (parser *Parser) parseExpressionStatement() (*ast.ExpressionStatement, erro
 	}
 	return stmt, nil
 }
+
+// parseBlockStatement Parses a BlockStatement
+func (parser *Parser) parseBlockStatement() *ast.BlockStatement {
+	block := ast.NewBlockStatement(parser.currentToken)
+	parser.nextToken()
+	if !parser.currentTokenIs(token.RBRACE) && !parser.currentTokenIs(token.EOF) {
+		stmt, err := parser.parseStatement()
+		if err != nil {
+			parser.AddError(err)
+		} else if stmt != nil {
+			block.AddStatements(stmt)
+		}
+		parser.nextToken()
+	}
+	return block
+}
