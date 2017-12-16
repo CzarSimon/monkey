@@ -109,3 +109,43 @@ func (parser *Parser) parseIfExpression() ast.Expression {
 	}
 	return expression
 }
+
+// parseFunctionLiteral Parses a FunctionLiteral
+func (parser *Parser) parseFunctionLiteral() ast.Expression {
+	fn := ast.NewFunctionLiteral(parser.currentToken)
+	if err := parser.expectPeek(token.LPAREN); err != nil {
+		parser.AddError(err)
+		return nil
+	}
+	fn.Parameters = parser.parseFunctionParameters()
+	if err := parser.expectPeek(token.LBRACE); err != nil {
+		parser.AddError(err)
+		return nil
+	}
+	fn.Body = parser.parseBlockStatement()
+	return fn
+}
+
+// parseFunctionParameters Parses a comma separated list of Identifiers as
+// function parameters
+func (parser *Parser) parseFunctionParameters() []*ast.Identifier {
+	params := make([]*ast.Identifier, 0)
+	if parser.peekTokenIs(token.RPAREN) {
+		parser.nextToken()
+		return params
+	}
+	parser.nextToken()
+	param := ast.NewIdentifier(parser.currentToken, parser.currentToken.Literal)
+	params = append(params, param)
+	for parser.peekTokenIs(token.COMMA) {
+		parser.nextToken()
+		parser.nextToken()
+		param := ast.NewIdentifier(parser.currentToken, parser.currentToken.Literal)
+		params = append(params, param)
+	}
+	if err := parser.expectPeek(token.RPAREN); err != nil {
+		parser.AddError(err)
+		return nil
+	}
+	return params
+}

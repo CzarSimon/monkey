@@ -320,6 +320,60 @@ func TestIfElseExpression(t *testing.T) {
 	}
 }
 
+func TestFunctionLiteralParsing(t *testing.T) {
+	input := "fn(x, y) { x + y; }"
+	program := testParseProgram(t, input, []string{})
+	testNumberOfStatemets(t, program, 1)
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("stmt not an *ast.ExpressionStatement, Got=%T", program.Statements[0])
+	}
+	fn, ok := stmt.Expression.(*ast.FunctionLiteral)
+	if !ok {
+		t.Fatalf("stmt.Expression not an *ast.FunctionLiteral, Got=%T", stmt.Expression)
+	}
+	if len(fn.Parameters) != 2 {
+		t.Fatalf("Unexpected number of function parameters Expected=2 Got=%d",
+			len(fn.Parameters))
+	}
+	testLiteralExpression(t, fn.Parameters[0], "x")
+	testLiteralExpression(t, fn.Parameters[1], "y")
+	if len(fn.Body.Statements) != 1 {
+		t.Fatalf(
+			"Unexpected number of statements in fn.Body Expected=1 Got=%d",
+			len(fn.Body.Statements))
+	}
+	bodyStmt, ok := fn.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("bodyStmt not an *ast.ExpressionStatement, Got=%T", fn.Body.Statements[0])
+	}
+	testInfixExpression(t, bodyStmt.Expression, "x", "+", "y")
+}
+
+func TestFunctionParameterParsing(t *testing.T) {
+	tests := []struct {
+		input          string
+		expectedParams []string
+	}{
+		{input: "fn() {};", expectedParams: []string{}},
+		{input: "fn(x) {};", expectedParams: []string{"x"}},
+		{input: "fn(x, y, z) {};", expectedParams: []string{"x", "y", "z"}},
+	}
+	for _, test := range tests {
+		program := testParseProgram(t, test.input, []string{})
+		testNumberOfStatemets(t, program, 1)
+		stmt := program.Statements[0].(*ast.ExpressionStatement)
+		fn := stmt.Expression.(*ast.FunctionLiteral)
+		if len(fn.Parameters) != len(test.expectedParams) {
+			t.Error("Wrong number of fn.Prameters Expected=%d Got=%d",
+				len(test.expectedParams), len(fn.Parameters))
+		}
+		for i, ident := range test.expectedParams {
+			testLiteralExpression(t, fn.Parameters[i], ident)
+		}
+	}
+}
+
 func testIntegerLiteral(t *testing.T, exp ast.Expression, value int64) bool {
 	intLiteral, ok := exp.(*ast.IntegerLiteral)
 	if !ok {
