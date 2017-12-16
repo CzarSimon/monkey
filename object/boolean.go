@@ -14,3 +14,10 @@ func (boolean *Boolean) Type() ObjectType {
 func (boolean *Boolean) Inspect() string {
 	return fmt.Sprintf("%t", boolean.Value)
 }
+
+// NewBoolean Creates a new Boolean object and returns a reference to it
+func NewBoolean(value bool) *Boolean {
+	return &Boolean{
+		Value: value,
+	}
+}
