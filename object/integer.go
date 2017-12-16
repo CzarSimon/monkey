@@ -14,3 +14,10 @@ func (integer *Integer) Type() ObjectType {
 func (integer *Integer) Inspect() string {
 	return fmt.Sprintf("%d", integer.Value)
 }
+
+// NewInteger Creates a new Integer object and returns a reference to it
+func NewInteger(value int64) *Integer {
+	return &Integer{
+		Value: value,
+	}
+}
