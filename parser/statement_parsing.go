@@ -27,8 +27,9 @@ func (parser *Parser) parseLetStatement() (*ast.LetStatement, error) {
 	if err := parser.expectPeek(token.ASSIGN); err != nil {
 		return nil, err
 	}
-	// TODO: Write expression parsing
-	for !parser.currentTokenIs(token.SEMICOLON) {
+	parser.nextToken()
+	stmt.Value = parser.parseExpression(LOWEST)
+	for parser.peekTokenIs(token.SEMICOLON) {
 		parser.nextToken()
 	}
 	return stmt, nil
@@ -38,8 +39,8 @@ func (parser *Parser) parseLetStatement() (*ast.LetStatement, error) {
 func (parser *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 	stmt := ast.NewReturnStatement(parser.currentToken)
 	parser.nextToken()
-	// TODO: Write expression parsing
-	for !parser.currentTokenIs(token.SEMICOLON) {
+	stmt.ReturnValue = parser.parseExpression(LOWEST)
+	for parser.peekTokenIs(token.SEMICOLON) {
 		parser.nextToken()
 	}
 	return stmt, nil

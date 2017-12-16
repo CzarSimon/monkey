@@ -152,5 +152,28 @@ func (parser *Parser) parseFunctionParameters() []*ast.Identifier {
 
 // parseCallExpression Parses a CallExpression
 func (parser *Parser) parseCallExpression(function ast.Expression) ast.Expression {
-	call := ast.NewCallExpression(parser.currentToken)
+	call := ast.NewCallExpression(parser.currentToken, function)
+	call.Arguments = parser.parseCallArguments()
+	return call
+}
+
+// parseCallExpression Parses a comma separated list of function arguments
+func (parser *Parser) parseCallArguments() []ast.Expression {
+	args := make([]ast.Expression, 0)
+	if parser.peekTokenIs(token.RPAREN) {
+		parser.nextToken()
+		return args
+	}
+	parser.nextToken()
+	args = append(args, parser.parseExpression(LOWEST))
+	for parser.peekTokenIs(token.COMMA) {
+		parser.nextToken()
+		parser.nextToken()
+		args = append(args, parser.parseExpression(LOWEST))
+	}
+	if err := parser.expectPeek(token.RPAREN); err != nil {
+		parser.AddError(err)
+		return nil
+	}
+	return args
 }

@@ -35,6 +35,31 @@ func TestLetStatements(t *testing.T) {
 	}
 }
 
+func TestLetStatementsWExpressions(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedIdentifier string
+		exprectedValue     interface{}
+	}{
+		{"let x = 5;", "x", 5},
+		{"let isTrue = true;", "isTrue", true},
+		{"let foobar = y;", "foobar", "y"},
+	}
+	expectedErrors := []string{}
+	for _, test := range tests {
+		program := testParseProgram(t, test.input, expectedErrors)
+		testNumberOfStatemets(t, program, 1)
+		stmt := program.Statements[0]
+		if !testLetStatement(t, stmt, test.expectedIdentifier) {
+			return
+		}
+		val := stmt.(*ast.LetStatement).Value
+		if !testLiteralExpression(t, val, test.exprectedValue) {
+			return
+		}
+	}
+}
+
 func testLetStatement(t *testing.T, stmt ast.Statement, name string) bool {
 	if stmt == nil {
 		t.Errorf("Stmt is nil")
@@ -234,6 +259,15 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		{"2 / (5 + 5)", "(2 / (5 + 5))"},
 		{"-(5 + 5)", "(-(5 + 5))"},
 		{"!(true == true)", "(!(true == true))"},
+		{"a + add(b * c) + d", "((a + add((b * c))) + d)"},
+		{
+			"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+			"add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+		},
+		{
+			"add(a + b + c * d / f + g)",
+			"add((((a + b) + ((c * d) / f)) + g))",
+		},
 	}
 	for _, test := range tests {
 		program := testParseProgram(t, test.input, []string{})
