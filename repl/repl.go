@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/CzarSimon/monkey/lexer"
-	"github.com/CzarSimon/monkey/token"
+	"github.com/CzarSimon/monkey/parser"
 )
 
 const PROMPT = ">> "
@@ -22,8 +22,35 @@ func Start(in io.Reader, out io.Writer) {
 		}
 		line := scanner.Text()
 		lex := lexer.New(line)
-		for tok := lex.NextToken(); tok.Type != token.EOF; tok = lex.NextToken() {
-			fmt.Printf("%+v\n", tok)
+		p := parser.New(lex)
+		program := p.ParseProgram()
+		if len(p.Errors()) != 0 {
+			printParseErrors(out, p.Errors())
+			continue
 		}
+		io.WriteString(out, program.String())
+		io.WriteString(out, "\n")
 	}
 }
+
+func printParseErrors(out io.Writer, errors []error) {
+	io.WriteString(out, MONKEY_FACE)
+	io.WriteString(out, "Woops! Looks like we ran into some monkey bussiness here\n")
+	io.WriteString(out, " parser errors:\n")
+	for i, err := range errors {
+		io.WriteString(out, fmt.Sprintf("\t%d. - %s\n", i, err.Error()))
+	}
+}
+
+const MONKEY_FACE = `
+    .--.  .-"     "-.  .--.
+	 / .. \/  .-. .-.  \/ .. \
+	| |  '|  /   Y   \  |'  | |
+	| \   \  \ 0 | 0 /  /   / |
+	 \ '- ,\.-"""""""-./, -' /
+	  ''-' /_   ^ ^   _\ '-''
+		    |  \._   _./  |
+				\   \ '~' /   /
+				 '._ '-=-' _.'
+				    '-----'
+`
