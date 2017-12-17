@@ -8,6 +8,11 @@ import (
 	"github.com/CzarSimon/monkey/parser"
 )
 
+type testStruct struct {
+	input    string
+	expected interface{}
+}
+
 func TestEvalIntegerExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -52,10 +57,7 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 }
 
 func TestEvalBooleanExpression(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected bool
-	}{
+	tests := []testStruct{
 		{"true", true},
 		{"false", false},
 		{"1 < 2", true},
@@ -79,15 +81,13 @@ func TestEvalBooleanExpression(t *testing.T) {
 
 	for _, test := range tests {
 		evaluated := testEval(test.input)
-		testBooleanObject(t, evaluated, test.expected)
+		expected := test.expected.(bool)
+		testBooleanObject(t, evaluated, expected)
 	}
 }
 
 func TestNotOperator(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected bool
-	}{
+	tests := []testStruct{
 		{"!true", false},
 		{"!false", true},
 		{"!5", false},
@@ -98,7 +98,29 @@ func TestNotOperator(t *testing.T) {
 
 	for _, test := range tests {
 		evaluated := testEval(test.input)
-		testBooleanObject(t, evaluated, test.expected)
+		expected := test.expected.(bool)
+		testBooleanObject(t, evaluated, expected)
+	}
+}
+
+func TestIfElseExpressions(t *testing.T) {
+	tests := []testStruct{
+		{"if (true) { 10 }", 10},
+		{"if (false) { 10 }", nil},
+		{"if (1) { 10 }", 10},
+		{"if (1 < 2) { 10 }", 10},
+		{"if (1 > 2) { 10 }", nil},
+		{"if (1 > 2) { 10 } else { 20 }", 20},
+		{"if (1 < 2) { 10 } else { 20 }", 10},
+	}
+	for _, test := range tests {
+		evaluated := testEval(test.input)
+		integer, ok := test.expected.(int)
+		if ok {
+			testIntegerObject(t, evaluated, int64(integer))
+		} else {
+			testNullObject(t, evaluated)
+		}
 	}
 }
 
@@ -110,6 +132,14 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	}
 	if res.Value != expected {
 		t.Errorf("Wrong res.Value Expected=%d Got=%d", expected, res.Value)
+		return false
+	}
+	return true
+}
+
+func testNullObject(t *testing.T, obj object.Object) bool {
+	if obj != NULL {
+		t.Errorf("object is not NULL Got=%T (%+v)", obj, obj)
 		return false
 	}
 	return true

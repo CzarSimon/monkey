@@ -30,6 +30,10 @@ func Eval(node ast.Node) object.Object {
 		leftArg := Eval(node.Left)
 		rightArg := Eval(node.Right)
 		return evalInfixExpression(node.Operator, leftArg, rightArg)
+	case *ast.BlockStatement:
+		return evalStatements(node.Statements)
+	case *ast.IFExpression:
+		return evalIfExpression(node)
 	}
 	return nil
 }
@@ -120,6 +124,31 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 		return nativeBoolTooBooleanObject(leftValue != rightValue)
 	default:
 		return NULL
+	}
+}
+
+// evalIfExpression Selects one branch of an IFExpression to evaluate
+func evalIfExpression(ifExpr *ast.IFExpression) object.Object {
+	condition := Eval(ifExpr.Condition)
+	if isTruthy(condition) {
+		return Eval(ifExpr.Consequence)
+	} else if ifExpr.Alternative != nil {
+		return Eval(ifExpr.Alternative)
+	}
+	return NULL
+}
+
+// isTruthy Checks if a supplied object is is truty
+func isTruthy(obj object.Object) bool {
+	switch obj {
+	case NULL:
+		return false
+	case TRUE:
+		return true
+	case FALSE:
+		return false
+	default:
+		return true
 	}
 }
 
