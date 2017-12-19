@@ -137,6 +137,26 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	return true
 }
 
+func TestReturnStatement(t *testing.T) {
+	tests := []testStruct{
+		{"return 10;", 10},
+		{"return 11; 9;", 11},
+		{"return 2 * 6; 9;", 12},
+		{"9; return 3 + 2 * 5; 10;", 13},
+		{`
+      if (1 > 0) {
+        return 10;
+      }
+      return 1;
+      `, 10},
+	}
+	for _, test := range tests {
+		evaluated := testEval(test.input)
+		integer := test.expected.(int)
+		testIntegerObject(t, evaluated, int64(integer))
+	}
+}
+
 func testNullObject(t *testing.T, obj object.Object) bool {
 	if obj != NULL {
 		t.Errorf("object is not NULL Got=%T (%+v)", obj, obj)
