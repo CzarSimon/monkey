@@ -7,6 +7,7 @@ import (
 
 	"github.com/CzarSimon/monkey/evaluator"
 	"github.com/CzarSimon/monkey/lexer"
+	"github.com/CzarSimon/monkey/object"
 	"github.com/CzarSimon/monkey/parser"
 )
 
@@ -15,6 +16,7 @@ const PROMPT = ">> "
 // Start Starts the repl
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 	for {
 		fmt.Print(PROMPT)
 		scanned := scanner.Scan()
@@ -29,9 +31,11 @@ func Start(in io.Reader, out io.Writer) {
 			printParseErrors(out, p.Errors())
 			continue
 		}
-		evaluated := evaluator.Eval(program)
-		io.WriteString(out, evaluated.Inspect())
-		io.WriteString(out, "\n")
+		evaluated := evaluator.Eval(program, env)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 

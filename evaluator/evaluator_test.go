@@ -40,7 +40,8 @@ func TestEvalIntegerExpression(t *testing.T) {
 func testEval(input string) object.Object {
 	l := lexer.New(input)
 	p := parser.New(l)
-	return Eval(p.ParseProgram())
+	env := object.NewEnvironment()
+	return Eval(p.ParseProgram(), env)
 }
 
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
@@ -225,12 +226,13 @@ func TestLetStatement(t *testing.T) {
 		{"let a = 5; a;", 5},
 		{"let a = 5 * 2; a;", 10},
 		{"let a = -5; let b = a; b;", -5},
-		{"let a = -5; let b = a; let c = a + b + 15;", 5},
+		{"let a = -5; let b = a; let c = a + b + 15; c;", 5},
 	}
-
-	for _, test := range tests {
+	for i, test := range tests {
 		evaluated := testEval(test.input)
 		expectedInt := test.expected.(int)
-		testIntegerObject(t, evaluated, int64(expectedInt))
+		if !testIntegerObject(t, evaluated, int64(expectedInt)) {
+			t.Errorf("%d. - Test failed", i)
+		}
 	}
 }
