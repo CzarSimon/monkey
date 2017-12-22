@@ -57,6 +57,18 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		env.Set(node.Name.Value, value)
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
+	case *ast.FunctionLiteral:
+		return object.NewFunction(node, env)
+	case *ast.CallExpression:
+		fn := Eval(node.Function, env)
+		if isError(fn) {
+			return fn
+		}
+		args := evalExpressions(node.Arguments, env)
+		if len(args) == 1 && isError(args[0]) {
+			return args[0]
+		}
+		return applyFunction(fn, args)
 	}
 	return nil
 }
@@ -75,6 +87,48 @@ func evalProgram(statements []ast.Statement, env *object.Environment) object.Obj
 		}
 	}
 	return result
+}
+
+// evalExpressions Evaluates an supplied array of expressions and
+// returns an object.Object slice
+func evalExpressions(expressions []ast.Expression, env *object.Environment) []object.Object {
+	result := make([]object.Object, 0, len(expressions))
+	for _, expression := range expressions {
+		evaluated := Eval(expression, env)
+		if isError(evaluated) {
+			return []object.Object{evaluated}
+		}
+		result = append(result, evaluated)
+	}
+	return result
+}
+
+// applyFunction Applies a series of evaluated arguments on a function
+func applyFunction(fn object.Object, args []object.Object) object.Object {
+	function, ok := fn.(*object.Function)
+	if !ok {
+		return object.NewErrorf("%s not a function", fn.Type())
+	}
+	functionEnv := extendFunctionEnv(function, args)
+	evaluated := Eval(function.Body, functionEnv)
+	return unwrappReturnValue(evaluated)
+}
+
+// extendFunctionEnv Adds evaluated objects to a temporary environment
+func extendFunctionEnv(fn *object.Function, args []object.Object) *object.Environment {
+	env := object.NewEnclosedEnvironment(fn.Env)
+	for i, param := range fn.Parameters {
+		env.Set(param.Value, args[i])
+	}
+	return env
+}
+
+// unwrappReturnValue Removes the ReturnValue wrapper around a return value
+func unwrappReturnValue(obj object.Object) object.Object {
+	if returnValue, ok := obj.(*object.ReturnValue); ok {
+		return returnValue.Value
+	}
+	return obj
 }
 
 // evalBlockStatement Evaluates a series of supplied statements
