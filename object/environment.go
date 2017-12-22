@@ -3,12 +3,14 @@ package object
 // Environment Store of variables and there associated objects
 type Environment struct {
 	store map[string]Object
+	outer *Environment
 }
 
 // NewEnvironment Creates an empty environment and retruns a reference to it
 func NewEnvironment() *Environment {
 	return &Environment{
 		store: make(map[string]Object),
+		outer: nil,
 	}
 }
 
@@ -25,4 +27,11 @@ func (env *Environment) Get(name string) (Object, *Error) {
 func (env *Environment) Set(name string, obj Object) Object {
 	env.store[name] = obj
 	return obj
+}
+
+// NewEnclosedEnvironment Creates a new environment with an outer environment set
+func NewEnclosedEnvironment(outer *Environment) *Environment {
+	env := NewEnvironment()
+	env.outer = outer
+	return env
 }
