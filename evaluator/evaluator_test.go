@@ -164,3 +164,73 @@ func testNullObject(t *testing.T, obj object.Object) bool {
 	}
 	return true
 }
+
+func TestErrorObject(t *testing.T) {
+	tests := []testStruct{
+		{
+			"5 + true",
+			"Type missmatch: INTEGER + BOOLEAN",
+		},
+		{
+			"5 + true; 5;",
+			"Type missmatch: INTEGER + BOOLEAN",
+		},
+		{
+			"-true",
+			"Unknown operator: -BOOLEAN",
+		},
+		{
+			"false + true",
+			"Unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			"5; true + true; 5;",
+			"Unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			"if (10 > 1) { false + true; }",
+			"Unknown operator: BOOLEAN + BOOLEAN",
+		},
+		{
+			`if (10 > 1) {
+			   if (10 > 1) {
+					 return true - false;
+				 }
+				 return true;
+			 } `,
+			"Unknown operator: BOOLEAN - BOOLEAN",
+		},
+		{
+			"foobar",
+			"Identifier not found: foobar",
+		},
+	}
+	for i, test := range tests {
+		evaluated := testEval(test.input)
+		err, ok := evaluated.(*object.Error)
+		if !ok {
+			t.Fatalf("%d. - Expected type *object.Error Got=%T(%+v)",
+				i, evaluated, evaluated)
+		}
+		expectedMsg := test.expected.(string)
+		if err.Message != expectedMsg {
+			t.Errorf("%d. - Wrong error message: Expected=%s Got=%s",
+				i, expectedMsg, err.Message)
+		}
+	}
+}
+
+func TestLetStatement(t *testing.T) {
+	tests := []testStruct{
+		{"let a = 5; a;", 5},
+		{"let a = 5 * 2; a;", 10},
+		{"let a = -5; let b = a; b;", -5},
+		{"let a = -5; let b = a; let c = a + b + 15;", 5},
+	}
+
+	for _, test := range tests {
+		evaluated := testEval(test.input)
+		expectedInt := test.expected.(int)
+		testIntegerObject(t, evaluated, int64(expectedInt))
+	}
+}
